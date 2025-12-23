@@ -17,6 +17,30 @@ export default function ContactPage() {
                 src="https://zerocontact-web.vercel.app/embed.js" 
                 strategy="lazyOnload"
             />
+
+            {/* ZeroContact宣伝 */}
+            <div className="mt-16 pt-8 border-t border-border">
+                <div className="bg-accent/30 rounded-lg p-6">
+                    <p className="text-sm text-muted mb-3">
+                        💡 このフォーム、いい感じじゃないですか？
+                    </p>
+                    <h3 className="text-lg font-semibold mb-2">
+                        ZeroContact - 最速でお問い合わせフォームを設置
+                    </h3>
+                    <p className="text-sm text-muted mb-4">
+                        コードを1行貼るだけで、美しいお問い合わせフォームをあなたのサイトに。
+                        スパム対策も通知もぜんぶ込み。もちろん無料から使えます。
+                    </p>
+                    <a 
+                        href="https://zerocontact-web.vercel.app" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+                    >
+                        ZeroContactを試してみる →
+                    </a>
+                </div>
+            </div>
         </main>
     )
 }
