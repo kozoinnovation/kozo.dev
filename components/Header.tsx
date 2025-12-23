@@ -18,6 +18,9 @@ export function Header() {
                     <Link href="/about" className="text-sm text-muted hover:text-foreground transition-colors">
                         About
                     </Link>
+                    <Link href="/contact" className="text-sm text-muted hover:text-foreground transition-colors">
+                        Contact
+                    </Link>
                     <ThemeToggle />
                 </nav>
             </div>

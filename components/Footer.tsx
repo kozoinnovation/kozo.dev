@@ -5,14 +5,6 @@ export function Footer() {
                 <p>© 2025 Hiroki</p>
                 <div className="flex items-center gap-6">
                     <a
-                        href="https://github.com/kozo-dev"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-foreground transition-colors"
-                    >
-                        GitHub
-                    </a>
-                    <a
                         href="https://x.com/kozo_innov"
                         target="_blank"
                         rel="noopener noreferrer"
