@@ -111,7 +111,7 @@ export function SaaSCalculator() {
     const totalARR = totalMRR * 12
     const netARR = netMRR * 12
 
-    const arpu = totalUsers > 0 ? totalMRR / totalUsers : 0
+    const arpu = numTotalUsers > 0 ? totalMRR / numTotalUsers : 0
     const paidUsers = starterUsers + proUsers
     const arppu = paidUsers > 0 ? (starterMRR + proMRR) / paidUsers : 0
 
@@ -181,17 +181,17 @@ export function SaaSCalculator() {
 
         if (plan === 'free') {
             setFreePercent(clampedValue)
-            const starterRatio = starterPercent / (starterPercent + proPercent) || 0.5
+            const starterRatio = numStarterPercent / (numStarterPercent + numProPercent) || 0.5
             setStarterPercent(Math.round(remaining * starterRatio))
             setProPercent(Math.round(remaining * (1 - starterRatio)))
         } else if (plan === 'starter') {
             setStarterPercent(clampedValue)
-            const freeRatio = freePercent / (freePercent + proPercent) || 0.5
+            const freeRatio = numFreePercent / (numFreePercent + numProPercent) || 0.5
             setFreePercent(Math.round(remaining * freeRatio))
             setProPercent(Math.round(remaining * (1 - freeRatio)))
         } else {
             setProPercent(clampedValue)
-            const freeRatio = freePercent / (freePercent + starterPercent) || 0.5
+            const freeRatio = numFreePercent / (numFreePercent + numStarterPercent) || 0.5
             setFreePercent(Math.round(remaining * freeRatio))
             setStarterPercent(Math.round(remaining * (1 - freeRatio)))
         }
