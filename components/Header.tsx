@@ -9,8 +9,8 @@ export function Header() {
                     kozo.dev
                 </Link>
                 <nav className="flex items-center gap-6">
-                    <Link href="/projects" className="text-sm text-muted hover:text-foreground transition-colors">
-                        Projects
+                    <Link href="/tools" className="text-sm text-muted hover:text-foreground transition-colors">
+                        Tools
                     </Link>
                     <Link href="/blog" className="text-sm text-muted hover:text-foreground transition-colors">
                         Blog
