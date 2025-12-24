@@ -13,7 +13,7 @@ import {
     ResponsiveContainer,
     Legend,
 } from 'recharts'
-import { Download, TrendingUp, TrendingDown, Users, Plus, Trash2 } from 'lucide-react'
+import { Download, TrendingUp, TrendingDown, Users, Plus, Trash2, Share2, Copy, Check, X, MessageCircle, Edit3 } from 'lucide-react'
 
 const STRIPE_FEE_RATE = 0.036
 
@@ -69,6 +69,9 @@ export function SaaSCalculator() {
     const [newCostName, setNewCostName] = useState('')
     const [newCostType, setNewCostType] = useState<'fixed' | 'variable'>('fixed')
     const [newCostAmount, setNewCostAmount] = useState<number | ''>(0)
+    const [copied, setCopied] = useState(false)
+    const [showShareModal, setShowShareModal] = useState(false)
+    const [customShareText, setCustomShareText] = useState('')
 
     // UI制御
 
@@ -95,7 +98,7 @@ export function SaaSCalculator() {
     const totalMRR = freeMRR + starterMRR + proMRR
 
     const stripeFee = stripeFeeEnabled ? totalMRR * STRIPE_FEE_RATE : 0
-    
+
     // カスタムコストの計算
     const fixedCosts = customCosts
         .filter(c => c.type === 'fixed')
@@ -105,7 +108,7 @@ export function SaaSCalculator() {
         .reduce((sum, c) => sum + (totalMRR * c.amount / 100), 0)
     const totalCustomCosts = fixedCosts + variableCosts
     const totalCosts = stripeFee + totalCustomCosts
-    
+
     const netMRR = totalMRR - totalCosts
     const profitRate = totalMRR > 0 ? (netMRR / totalMRR) * 100 : 0
     const totalARR = totalMRR * 12
@@ -277,6 +280,80 @@ export function SaaSCalculator() {
         link.click()
     }
 
+    // シェアテキスト生成
+    const generateShareText = () => {
+        const netGrowth = numMonthlyGrowthRate - numChurnRate
+        const text = `📊 SaaS収益シミュレーション
+━━━━━━━━━━━━━━━━━━━━━━
+👥 ${numTotalUsers.toLocaleString()}人 → 12ヶ月後 ${lastMonth?.ユーザー数.toLocaleString()}人
+💰 MRR ${formatCompactCurrency(totalMRR)} → ${formatCompactCurrency(lastMonth?.純MRR || 0)}
+📈 純成長率 ${netGrowth >= 0 ? '+' : ''}${netGrowth.toFixed(1)}%/月
+💵 12ヶ月累積 ${formatCompactCurrency(lastMonth?.累積純売上 || 0)}
+━━━━━━━━━━━━━━━━━━━━━━
+🔗 kozo.dev/tools/saas-calculator`
+        return text
+    }
+
+    // シェアモーダルを開く
+    const openShareModal = () => {
+        setCustomShareText(generateShareText())
+        setShowShareModal(true)
+    }
+
+    // Xでシェア
+    const shareToX = (text?: string) => {
+        const shareText = text || generateShareText()
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
+        window.open(url, '_blank', 'noopener,noreferrer')
+    }
+
+    // LINEでシェア
+    const shareToLINE = (text?: string) => {
+        const shareText = text || generateShareText()
+        const url = `https://social-plugins.line.me/lineit/share?text=${encodeURIComponent(shareText)}`
+        window.open(url, '_blank', 'noopener,noreferrer')
+    }
+
+    // Threadsでシェア（URLスキーム経由）
+    const shareToThreads = async (text?: string) => {
+        const shareText = text || generateShareText()
+        // ThreadsはWeb共有APIがないため、テキストをコピーしてアプリを開く
+        try {
+            await navigator.clipboard.writeText(shareText)
+            // barcelona://はThreadsのURLスキーム
+            window.open('https://www.threads.net/intent/post', '_blank', 'noopener,noreferrer')
+        } catch {
+            // フォールバック
+            const textarea = document.createElement('textarea')
+            textarea.value = shareText
+            document.body.appendChild(textarea)
+            textarea.select()
+            document.execCommand('copy')
+            document.body.removeChild(textarea)
+            window.open('https://www.threads.net', '_blank', 'noopener,noreferrer')
+        }
+    }
+
+    // クリップボードにコピー
+    const copyToClipboard = async (text?: string) => {
+        const shareText = text || generateShareText()
+        try {
+            await navigator.clipboard.writeText(shareText)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+        } catch {
+            // フォールバック
+            const textarea = document.createElement('textarea')
+            textarea.value = shareText
+            document.body.appendChild(textarea)
+            textarea.select()
+            document.execCommand('copy')
+            document.body.removeChild(textarea)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+        }
+    }
+
     const lastMonth = growthData[growthData.length - 1]
     const firstMonth = growthData[0]
     const userGrowthRate = firstMonth ? ((lastMonth.ユーザー数 - firstMonth.ユーザー数) / firstMonth.ユーザー数) * 100 : 0
@@ -384,7 +461,7 @@ export function SaaSCalculator() {
                             <TrendingUp className="inline w-4 h-4 mr-1" />
                             成長シミュレーション
                         </label>
-                        
+
                         {/* 純成長率（メイン表示） */}
                         <div className={`text-center p-4 rounded-lg mb-4 ${numMonthlyGrowthRate - numChurnRate >= 0 ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
                             <div className="text-xs text-muted mb-1">純成長率（月次）</div>
@@ -482,7 +559,7 @@ export function SaaSCalculator() {
                                 </span>
                             )}
                         </div>
-                        
+
                         {/* コスト一覧 */}
                         <div className="space-y-2 mb-3">
                             {/* Stripe手数料（常に表示） */}
@@ -495,7 +572,7 @@ export function SaaSCalculator() {
                                     <span className="text-muted">-{formatCurrency(stripeFee)}</span>
                                 </div>
                             )}
-                            
+
                             {/* カスタムコスト項目 */}
                             {customCosts.map(cost => {
                                 const costAmount = cost.type === 'fixed' ? cost.amount : totalMRR * cost.amount / 100
@@ -519,7 +596,7 @@ export function SaaSCalculator() {
                                     </div>
                                 )
                             })}
-                            
+
                             {!stripeFeeEnabled && customCosts.length === 0 && (
                                 <div className="text-sm text-muted text-center py-2">
                                     コストなし（利益率100%）
@@ -724,15 +801,51 @@ export function SaaSCalculator() {
 
             {/* グラフエリア */}
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-4">
                     <h2 className="text-lg font-medium">12ヶ月シミュレーション</h2>
-                    <button
-                        onClick={exportCSV}
-                        className="flex items-center gap-2 px-3 py-2 text-sm border border-border rounded-lg hover:bg-accent/10 transition-colors"
-                    >
-                        <Download className="w-4 h-4" />
-                        CSV出力
-                    </button>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {/* クイックシェアボタン */}
+                        <button
+                            onClick={() => copyToClipboard()}
+                            className="flex items-center gap-2 px-3 py-2 text-sm border border-border rounded-lg hover:bg-accent/10 transition-colors"
+                            title="テキストをコピー"
+                        >
+                            {copied ? (
+                                <Check className="w-4 h-4 text-green-500" />
+                            ) : (
+                                <Copy className="w-4 h-4" />
+                            )}
+                        </button>
+                        <button
+                            onClick={() => shareToX()}
+                            className="flex items-center gap-2 px-3 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                            title="Xでシェア"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => shareToLINE()}
+                            className="flex items-center gap-2 px-3 py-2 text-sm bg-[#06C755] text-white rounded-lg hover:bg-[#05b34c] transition-colors"
+                            title="LINEでシェア"
+                        >
+                            <MessageCircle className="w-4 h-4" />
+                        </button>
+                        {/* カスタマイズシェアボタン */}
+                        <button
+                            onClick={openShareModal}
+                            className="flex items-center gap-2 px-3 py-2 text-sm bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
+                        >
+                            <Edit3 className="w-4 h-4" />
+                            シェア
+                        </button>
+                        <button
+                            onClick={exportCSV}
+                            className="flex items-center gap-2 px-3 py-2 text-sm border border-border rounded-lg hover:bg-accent/10 transition-colors"
+                        >
+                            <Download className="w-4 h-4" />
+                            CSV
+                        </button>
+                    </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -867,6 +980,136 @@ export function SaaSCalculator() {
                 <br />
                 ※ データはブラウザ上でのみ処理され、サーバーには送信されません。
             </div>
+
+            {/* シェアモーダル */}
+            {showShareModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* オーバーレイ */}
+                    <div
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={() => setShowShareModal(false)}
+                    />
+
+                    {/* モーダル本体 */}
+                    <div className="relative bg-background border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-auto">
+                        {/* ヘッダー */}
+                        <div className="flex items-center justify-between p-4 border-b border-border">
+                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                                <Share2 className="w-5 h-5" />
+                                シェア
+                            </h3>
+                            <button
+                                onClick={() => setShowShareModal(false)}
+                                className="p-2 hover:bg-accent/10 rounded-lg transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* コンテンツ */}
+                        <div className="p-4 space-y-4">
+                            {/* テキスト編集エリア */}
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    シェアテキスト（編集可能）
+                                </label>
+                                <textarea
+                                    value={customShareText}
+                                    onChange={(e) => setCustomShareText(e.target.value)}
+                                    className="w-full h-48 px-3 py-2 text-sm border border-border rounded-lg bg-background font-mono resize-none focus:outline-none focus:ring-2 focus:ring-accent"
+                                />
+                                <div className="flex justify-between mt-2">
+                                    <span className="text-xs text-muted">
+                                        {customShareText.length} 文字
+                                    </span>
+                                    <button
+                                        onClick={() => setCustomShareText(generateShareText())}
+                                        className="text-xs text-accent hover:underline"
+                                    >
+                                        リセット
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* シェア先選択 */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium">
+                                    シェア先を選択
+                                </label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {/* X(Twitter) */}
+                                    <button
+                                        onClick={() => {
+                                            shareToX(customShareText)
+                                            setShowShareModal(false)
+                                        }}
+                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                                    >
+                                        <X className="w-5 h-5" />
+                                        <span>X (Twitter)</span>
+                                    </button>
+
+                                    {/* LINE */}
+                                    <button
+                                        onClick={() => {
+                                            shareToLINE(customShareText)
+                                            setShowShareModal(false)
+                                        }}
+                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-[#06C755] text-white rounded-lg hover:bg-[#05b34c] transition-colors"
+                                    >
+                                        <MessageCircle className="w-5 h-5" />
+                                        <span>LINE</span>
+                                    </button>
+
+                                    {/* Threads */}
+                                    <button
+                                        onClick={() => {
+                                            shareToThreads(customShareText)
+                                            setShowShareModal(false)
+                                        }}
+                                        className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-lg hover:opacity-90 transition-opacity"
+                                    >
+                                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01c.024-3.576 1.15-6.428 2.523-8.48C5.844 1.183 8.593.01 12.18 0h.014c2.746.014 5.064.741 6.886 2.165 1.678 1.31 2.894 3.163 3.616 5.514l-2.04.57c-.578-1.9-1.544-3.378-2.871-4.396-1.448-1.11-3.321-1.682-5.57-1.7-2.893.02-5.073.939-6.478 2.731-1.198 1.527-1.831 3.692-1.885 6.446.054 2.754.687 4.92 1.885 6.448 1.405 1.792 3.585 2.711 6.478 2.731 2.109-.015 3.85-.458 5.179-1.317 1.395-.9 2.188-2.14 2.418-3.791l2.022.38c-.31 2.18-1.381 3.911-3.185 5.147-1.734 1.19-4 1.8-6.739 1.82zm6.27-8.49c-.125-3.2-2.159-4.956-5.728-4.956h-.132c-1.354 0-2.522.287-3.474.854-1.076.641-1.714 1.593-1.9 2.834l2.012.323c.266-1.606 1.532-2.084 3.36-2.084h.13c1.127 0 2.006.24 2.615.71.574.448.881 1.095.916 1.92-.92-.14-1.915-.22-2.974-.24-2.26 0-4.063.51-5.202 1.477-.97.822-1.482 1.958-1.48 3.283.003 1.335.55 2.44 1.584 3.199.96.704 2.213 1.06 3.725 1.06 1.884 0 3.455-.617 4.668-1.834.48-.482.857-1.015 1.127-1.586.123.86.333 1.59.633 2.186l1.767-.916c-.55-1.092-.73-2.537-.73-4.626v-1.603h.003z"/>
+                                        </svg>
+                                        <span>Threads</span>
+                                    </button>
+
+                                    {/* コピー */}
+                                    <button
+                                        onClick={() => copyToClipboard(customShareText)}
+                                        className="flex items-center justify-center gap-2 px-4 py-3 border border-border rounded-lg hover:bg-accent/10 transition-colors"
+                                    >
+                                        {copied ? (
+                                            <>
+                                                <Check className="w-5 h-5 text-green-500" />
+                                                <span className="text-green-500">コピー済み</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Copy className="w-5 h-5" />
+                                                <span>コピー</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* プレビュー */}
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    プレビュー
+                                </label>
+                                <div className="p-4 bg-accent/5 rounded-lg border border-border">
+                                    <pre className="text-sm whitespace-pre-wrap font-sans text-muted">
+                                        {customShareText}
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
