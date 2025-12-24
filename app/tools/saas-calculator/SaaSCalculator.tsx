@@ -13,7 +13,7 @@ import {
     ResponsiveContainer,
     Legend,
 } from 'recharts'
-import { Download, TrendingUp, TrendingDown, Users, Plus, Trash2, Share2, Copy, Check, X, MessageCircle, Edit3 } from 'lucide-react'
+import { Download, TrendingUp, TrendingDown, Users, Plus, Trash2, Share2, Copy, Check, X, MessageCircle, Edit3, Globe } from 'lucide-react'
 
 const STRIPE_FEE_RATE = 0.036
 
@@ -21,12 +21,171 @@ const STRIPE_FEE_RATE = 0.036
 type CostItem = {
     id: string
     name: string
-    type: 'fixed' | 'variable' // fixed: 月額固定, variable: MRRの%
-    amount: number // fixed: 金額, variable: パーセンテージ
+    type: 'fixed' | 'variable'
+    amount: number
+}
+
+type Lang = 'ja' | 'en'
+
+// 翻訳オブジェクト
+const translations = {
+    ja: {
+        totalUsers: '総ユーザー数',
+        people: '人',
+        planPricing: 'プラン料金（月額）',
+        firstMonthFree: '初月無料',
+        freeAvailable: 'Freeあり',
+        allPaid: '全員有料',
+        firstMonthFreeDesc: '🎁 新規ユーザーは初月無料。翌月から課金開始。',
+        userDistribution: 'ユーザー配分',
+        growthSimulation: '成長シミュレーション',
+        netGrowthRate: '純成長率（月次）',
+        monthly: '月',
+        growthRate: '成長率',
+        churnRate: '解約率',
+        presets: 'プリセット:',
+        stable: '安定',
+        growing: '成長期',
+        rapid: '急成長',
+        stagnant: '停滞',
+        maintenanceCost: '維持コスト',
+        total: '合計:',
+        perMonth: '/月',
+        noCost: 'コストなし（利益率100%）',
+        costName: '項目名（例: サーバー費, 人件費）',
+        fixedCost: '固定費（¥/月）',
+        variableCost: '変動費（% of MRR）',
+        amount: '金額',
+        ratio: '割合',
+        cancel: 'キャンセル',
+        add: '追加',
+        addCost: 'コストを追加',
+        profitRate: '利益率',
+        mrr: '月次経常収益（MRR）',
+        arr: '年次経常収益（ARR）',
+        cost: 'コスト',
+        netMrr: '純MRR',
+        annualCost: '年間コスト',
+        netArr: '純ARR',
+        arpuAll: 'ARPU（全体）',
+        arppuPaid: 'ARPPU（有料のみ）',
+        perUser: '/ ユーザー / 月',
+        perPaidUser: '/ 有料ユーザー / 月',
+        forecast12: '12ヶ月後の予測',
+        users: 'ユーザー数',
+        cumulativeNet: '累積純売上',
+        annualizedArr: '年換算ARR',
+        simulation12: '12ヶ月シミュレーション',
+        share: 'シェア',
+        mrrTrend: 'MRR推移',
+        userTrend: 'ユーザー数推移',
+        usersByPlan: 'プラン別ユーザー数',
+        cumulativeRevenue: '累積純売上',
+        disclaimer1: '※ このツールはシミュレーション用です。実際の収益は様々な要因により異なります。',
+        disclaimer2: '※ データはブラウザ上でのみ処理され、サーバーには送信されません。',
+        shareText: 'シェアテキスト（編集可能）',
+        chars: '文字',
+        reset: 'リセット',
+        selectDestination: 'シェア先を選択',
+        copied: 'コピー済み',
+        copy: 'コピー',
+        preview: 'プレビュー',
+        fixed: '固定',
+        variable: '変動',
+        stripeFee: 'Stripe手数料',
+        currentMrr: '現在のMRRで:',
+        firstMonthFreeDiscount: '初月無料',
+        peopleUnit: '人分',
+        newAcquisition: '新規獲得',
+        churn: '解約',
+        netIncrease: '純増',
+        totalMrr: '総MRR',
+        month: '月',
+    },
+    en: {
+        totalUsers: 'Total Users',
+        people: '',
+        planPricing: 'Plan Pricing (Monthly)',
+        firstMonthFree: '1st Free',
+        freeAvailable: 'Free Plan',
+        allPaid: 'All Paid',
+        firstMonthFreeDesc: '🎁 New users get first month free. Billing starts next month.',
+        userDistribution: 'User Distribution',
+        growthSimulation: 'Growth Simulation',
+        netGrowthRate: 'Net Growth Rate (Monthly)',
+        monthly: '/mo',
+        growthRate: 'Growth',
+        churnRate: 'Churn',
+        presets: 'Presets:',
+        stable: 'Stable',
+        growing: 'Growing',
+        rapid: 'Rapid',
+        stagnant: 'Stagnant',
+        maintenanceCost: 'Operating Costs',
+        total: 'Total:',
+        perMonth: '/mo',
+        noCost: 'No costs (100% margin)',
+        costName: 'Name (e.g. Server, Staff)',
+        fixedCost: 'Fixed ($/mo)',
+        variableCost: 'Variable (% of MRR)',
+        amount: 'Amount',
+        ratio: 'Ratio',
+        cancel: 'Cancel',
+        add: 'Add',
+        addCost: 'Add Cost',
+        profitRate: 'Profit Margin',
+        mrr: 'Monthly Recurring Revenue (MRR)',
+        arr: 'Annual Recurring Revenue (ARR)',
+        cost: 'Cost',
+        netMrr: 'Net MRR',
+        annualCost: 'Annual Cost',
+        netArr: 'Net ARR',
+        arpuAll: 'ARPU (All)',
+        arppuPaid: 'ARPPU (Paid)',
+        perUser: '/ user / mo',
+        perPaidUser: '/ paid user / mo',
+        forecast12: '12-Month Forecast',
+        users: 'Users',
+        cumulativeNet: 'Cumulative Net',
+        annualizedArr: 'Annualized ARR',
+        simulation12: '12-Month Simulation',
+        share: 'Share',
+        mrrTrend: 'MRR Trend',
+        userTrend: 'User Trend',
+        usersByPlan: 'Users by Plan',
+        cumulativeRevenue: 'Cumulative Net Revenue',
+        disclaimer1: '※ This tool is for simulation purposes. Actual revenue may vary.',
+        disclaimer2: '※ Data is processed locally and not sent to any server.',
+        shareText: 'Share Text (Editable)',
+        chars: 'chars',
+        reset: 'Reset',
+        selectDestination: 'Select Destination',
+        copied: 'Copied',
+        copy: 'Copy',
+        preview: 'Preview',
+        fixed: 'Fixed',
+        variable: 'Variable',
+        stripeFee: 'Stripe Fee',
+        currentMrr: 'At current MRR:',
+        firstMonthFreeDiscount: '1st Free',
+        peopleUnit: 'users',
+        newAcquisition: 'New',
+        churn: 'Churn',
+        netIncrease: 'Net',
+        totalMrr: 'Total MRR',
+        month: '',
+    },
 }
 
 // 通貨フォーマット
-const formatCurrency = (amount: number) => {
+const formatCurrency = (amount: number, lang: Lang = 'ja') => {
+    if (lang === 'en') {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+        }).format(Math.round(amount / 150)) // 簡易的に円→ドル換算
+    }
     return new Intl.NumberFormat('ja-JP', {
         style: 'currency',
         currency: 'JPY',
@@ -34,21 +193,36 @@ const formatCurrency = (amount: number) => {
     }).format(amount)
 }
 
-const formatCompactCurrency = (amount: number) => {
+const formatCompactCurrency = (amount: number, lang: Lang = 'ja') => {
+    if (lang === 'en') {
+        const usd = Math.round(amount / 150)
+        if (usd >= 1000000) {
+            return `$${(usd / 1000000).toFixed(1)}M`
+        }
+        if (usd >= 1000) {
+            return `$${(usd / 1000).toFixed(1)}K`
+        }
+        return formatCurrency(amount, lang)
+    }
     if (amount >= 100000000) {
         return `¥${(amount / 100000000).toFixed(1)}億`
     }
     if (amount >= 10000) {
         return `¥${(amount / 10000).toFixed(1)}万`
     }
-    return formatCurrency(amount)
+    return formatCurrency(amount, lang)
 }
 
 export function SaaSCalculator() {
+    // 言語設定
+    const [lang, setLang] = useState<Lang>('ja')
+    const t = translations[lang]
+
     // 基本設定
     const [totalUsers, setTotalUsers] = useState<number | ''>(1000)
     const [stripeFeeEnabled, setStripeFeeEnabled] = useState(true)
     const [freePlanEnabled, setFreePlanEnabled] = useState(true)
+    const [firstMonthFree, setFirstMonthFree] = useState(false)
 
     // プラン料金
     const [freePlanPrice, setFreePlanPrice] = useState<number | ''>(0)
@@ -88,19 +262,28 @@ export function SaaSCalculator() {
     const numChurnRate = churnRate || 0
     const numNewCostAmount = newCostAmount || 0
 
-    // 計算値（Freeプラン無効時は配分を自動調整）
+    // 計算値（Freeプラン無効時はFree=0、StarterとProはそのまま使用）
     const effectiveFreePercent = freePlanEnabled ? numFreePercent : 0
-    const effectiveStarterPercent = freePlanEnabled ? numStarterPercent : Math.round(numStarterPercent / (numStarterPercent + numProPercent) * 100) || 50
-    const effectiveProPercent = freePlanEnabled ? numProPercent : 100 - effectiveStarterPercent
+    const effectiveStarterPercent = freePlanEnabled ? numStarterPercent : numStarterPercent
+    const effectiveProPercent = freePlanEnabled ? numProPercent : numProPercent
 
     const freeUsers = Math.round((numTotalUsers * effectiveFreePercent) / 100)
     const starterUsers = Math.round((numTotalUsers * effectiveStarterPercent) / 100)
     const proUsers = Math.round((numTotalUsers * effectiveProPercent) / 100)
 
+    // 初月無料: 新規ユーザー（成長率分）は初月無料
+    const newUsersPerMonth = Math.round(numTotalUsers * (numMonthlyGrowthRate / 100))
+    const freeTrialStarterUsers = firstMonthFree ? Math.round(newUsersPerMonth * effectiveStarterPercent / 100) : 0
+    const freeTrialProUsers = firstMonthFree ? Math.round(newUsersPerMonth * effectiveProPercent / 100) : 0
+
     const freeMRR = freeUsers * numFreePlanPrice
-    const starterMRR = starterUsers * numStarterPlanPrice
-    const proMRR = proUsers * numProPlanPrice
+    const starterMRR = (starterUsers - freeTrialStarterUsers) * numStarterPlanPrice
+    const proMRR = (proUsers - freeTrialProUsers) * numProPlanPrice
     const totalMRR = freeMRR + starterMRR + proMRR
+
+    // 初月無料なしの場合のMRR（比較用）
+    const fullMRR = freeUsers * numFreePlanPrice + starterUsers * numStarterPlanPrice + proUsers * numProPlanPrice
+    const freeTrialDiscount = fullMRR - totalMRR
 
     const stripeFee = stripeFeeEnabled ? totalMRR * STRIPE_FEE_RATE : 0
 
@@ -128,6 +311,7 @@ export function SaaSCalculator() {
         const data = []
         let currentUsers = numTotalUsers
         let cumulativeNetRevenue = 0
+        let freeTrialUsers = 0 // 無料トライアル中のユーザー数
 
         for (let month = 1; month <= 12; month++) {
             const monthStartUsers = month === 1 ? numTotalUsers : currentUsers
@@ -139,9 +323,13 @@ export function SaaSCalculator() {
             const monthlyStarterUsers = Math.round((currentUsers * effectiveStarterPercent) / 100)
             const monthlyProUsers = Math.round((currentUsers * effectiveProPercent) / 100)
 
+            // 初月無料プロモーション: 新規ユーザーは初月無料
+            const paidStarterUsers = monthlyStarterUsers - (firstMonthFree ? Math.round(freeTrialUsers * effectiveStarterPercent / 100) : 0)
+            const paidProUsers = monthlyProUsers - (firstMonthFree ? Math.round(freeTrialUsers * effectiveProPercent / 100) : 0)
+
             const monthlyFreeMRR = monthlyFreeUsers * numFreePlanPrice
-            const monthlyStarterMRR = monthlyStarterUsers * numStarterPlanPrice
-            const monthlyProMRR = monthlyProUsers * numProPlanPrice
+            const monthlyStarterMRR = Math.max(0, paidStarterUsers) * numStarterPlanPrice
+            const monthlyProMRR = Math.max(0, paidProUsers) * numProPlanPrice
             const monthlyTotalMRR = monthlyFreeMRR + monthlyStarterMRR + monthlyProMRR
 
             const monthlyStripeFee = stripeFeeEnabled ? monthlyTotalMRR * STRIPE_FEE_RATE : 0
@@ -151,6 +339,9 @@ export function SaaSCalculator() {
             const monthlyTotalCosts = monthlyStripeFee + fixedCosts + monthlyVariableCosts
             const monthlyNetMRR = monthlyTotalMRR - monthlyTotalCosts
             cumulativeNetRevenue += monthlyNetMRR
+
+            // 来月用: 今月の新規ユーザーが無料トライアル対象
+            freeTrialUsers = newUsers
 
             data.push({
                 month: `${month}月`,
@@ -162,8 +353,9 @@ export function SaaSCalculator() {
                 純MRR: Math.round(monthlyNetMRR),
                 累積純売上: Math.round(cumulativeNetRevenue),
                 Free: monthlyFreeUsers,
-                Starter: monthlyStarterUsers,
+                Standard: monthlyStarterUsers,
                 Pro: monthlyProUsers,
+                無料トライアル中: firstMonthFree ? freeTrialUsers : 0,
             })
         }
         return data
@@ -180,6 +372,7 @@ export function SaaSCalculator() {
         stripeFeeEnabled,
         customCosts,
         fixedCosts,
+        firstMonthFree,
     ])
 
     // パーセンテージ変更ハンドラ
@@ -257,7 +450,7 @@ export function SaaSCalculator() {
         csv += '【プラン配分】\n'
         csv += 'プラン名,配分率,ユーザー数,月額料金,月次収益(MRR)\n'
         csv += `Free,${numFreePercent}%,${freeUsers},${formatCurrency(numFreePlanPrice)},${formatCurrency(freeMRR)}\n`
-        csv += `Starter,${numStarterPercent}%,${starterUsers},${formatCurrency(numStarterPlanPrice)},${formatCurrency(starterMRR)}\n`
+        csv += `Standard,${numStarterPercent}%,${starterUsers},${formatCurrency(numStarterPlanPrice)},${formatCurrency(starterMRR)}\n`
         csv += `Pro,${numProPercent}%,${proUsers},${formatCurrency(numProPlanPrice)},${formatCurrency(proMRR)}\n`
         csv += `合計,100%,${numTotalUsers},-,${formatCurrency(totalMRR)}\n\n`
 
@@ -285,9 +478,9 @@ export function SaaSCalculator() {
         csv += `ARPPU,${formatCurrency(arppu)}\n\n`
 
         csv += '【12ヶ月間の推移データ】\n'
-        csv += '月,総ユーザー数,新規獲得,解約数,純増,Freeユーザー,Starterユーザー,Proユーザー,総MRR,純MRR,累積純売上\n'
+        csv += '月,総ユーザー数,新規獲得,解約数,純増,Freeユーザー,Standardユーザー,Proユーザー,総MRR,純MRR,累積純売上\n'
         growthData.forEach((d) => {
-            csv += `${d.month},${d.ユーザー数},${d.新規獲得},${d.解約},${d.純増},${d.Free},${d.Starter},${d.Pro},${formatCurrency(d.総MRR)},${formatCurrency(d.純MRR)},${formatCurrency(d.累積純売上)}\n`
+            csv += `${d.month},${d.ユーザー数},${d.新規獲得},${d.解約},${d.純増},${d.Free},${d.Standard},${d.Pro},${formatCurrency(d.総MRR)},${formatCurrency(d.純MRR)},${formatCurrency(d.累積純売上)}\n`
         })
 
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -377,6 +570,17 @@ export function SaaSCalculator() {
 
     return (
         <div className="space-y-8">
+            {/* 言語切り替え */}
+            <div className="flex justify-end">
+                <button
+                    onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-accent/10 transition-colors"
+                >
+                    <Globe className="w-4 h-4" />
+                    {lang === 'ja' ? 'EN' : 'JP'}
+                </button>
+            </div>
+
             {/* 設定エリア */}
             <div className="grid md:grid-cols-2 gap-8">
                 {/* 左カラム: 入力 */}
@@ -385,7 +589,7 @@ export function SaaSCalculator() {
                     <div className="p-4 border border-border rounded-lg">
                         <label className="block text-sm font-medium mb-3">
                             <Users className="inline w-4 h-4 mr-1" />
-                            総ユーザー数
+                            {t.totalUsers}
                         </label>
                         <div className="flex items-center gap-2">
                             <input
@@ -398,7 +602,7 @@ export function SaaSCalculator() {
                                 className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
                                 inputMode="numeric"
                             />
-                            <span className="text-muted text-sm">人</span>
+                            <span className="text-muted text-sm">{t.people}</span>
                         </div>
                         <div className="flex gap-1 mt-2 flex-wrap">
                             {[100, 500, 1000, 5000, 10000].map((n) => (
@@ -416,23 +620,49 @@ export function SaaSCalculator() {
                     {/* プラン料金設定 */}
                     <div className="p-4 border border-border rounded-lg">
                         <div className="flex items-center justify-between mb-3">
-                            <label className="text-sm font-medium">プラン料金（月額）</label>
-                            <button
-                                onClick={() => setFreePlanEnabled(!freePlanEnabled)}
-                                className={`flex items-center gap-2 px-3 py-1.5 text-xs rounded-full transition-colors ${
-                                    freePlanEnabled
-                                        ? 'bg-gray-200 dark:bg-gray-700 text-muted'
-                                        : 'bg-accent text-white'
-                                }`}
-                            >
-                                <span className={`w-2 h-2 rounded-full ${freePlanEnabled ? 'bg-gray-400' : 'bg-white'}`} />
-                                {freePlanEnabled ? 'Freeあり' : '全員有料'}
-                            </button>
+                            <label className="text-sm font-medium">{t.planPricing}</label>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setFirstMonthFree(!firstMonthFree)}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-full transition-colors ${
+                                        firstMonthFree
+                                            ? 'bg-orange-500 text-white'
+                                            : 'bg-gray-200 dark:bg-gray-700 text-muted'
+                                    }`}
+                                >
+                                    <span className={`w-2 h-2 rounded-full ${firstMonthFree ? 'bg-white' : 'bg-gray-400'}`} />
+                                    {t.firstMonthFree}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (freePlanEnabled) {
+                                            // Freeプランをオフにする時、配分を調整
+                                            const total = numStarterPercent + numProPercent
+                                            if (total > 0) {
+                                                setStarterPercent(Math.round(numStarterPercent / total * 100))
+                                                setProPercent(Math.round(numProPercent / total * 100))
+                                            } else {
+                                                setStarterPercent(50)
+                                                setProPercent(50)
+                                            }
+                                        }
+                                        setFreePlanEnabled(!freePlanEnabled)
+                                    }}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-full transition-colors ${
+                                        freePlanEnabled
+                                            ? 'bg-gray-200 dark:bg-gray-700 text-muted'
+                                            : 'bg-accent text-white'
+                                    }`}
+                                >
+                                    <span className={`w-2 h-2 rounded-full ${freePlanEnabled ? 'bg-gray-400' : 'bg-white'}`} />
+                                    {freePlanEnabled ? t.freeAvailable : t.allPaid}
+                                </button>
+                            </div>
                         </div>
                         <div className="space-y-3">
                             {[
                                 { label: 'Free', value: freePlanPrice, setter: setFreePlanPrice, color: 'text-muted', show: freePlanEnabled },
-                                { label: 'Starter', value: starterPlanPrice, setter: setStarterPlanPrice, color: 'text-accent', show: true },
+                                { label: 'Standard', value: starterPlanPrice, setter: setStarterPlanPrice, color: 'text-accent', show: true },
                                 { label: 'Pro', value: proPlanPrice, setter: setProPlanPrice, color: 'text-purple-500', show: true },
                             ].filter(plan => plan.show).map((plan) => (
                                 <div key={plan.label} className="flex items-center gap-2">
@@ -451,16 +681,21 @@ export function SaaSCalculator() {
                                 </div>
                             ))}
                         </div>
+                        {firstMonthFree && (
+                            <div className="mt-3 p-2 bg-orange-500/10 rounded-lg text-xs text-orange-600 dark:text-orange-400">
+                                {t.firstMonthFreeDesc}
+                            </div>
+                        )}
                     </div>
 
                     {/* ユーザー配分 */}
                     <div className="p-4 border border-border rounded-lg">
-                        <label className="block text-sm font-medium mb-3">ユーザー配分</label>
+                        <label className="block text-sm font-medium mb-3">{t.userDistribution}</label>
                         <div className="space-y-4">
                             {[
-                                { label: 'Free', value: freePlanEnabled ? freePercent : 0, displayValue: effectiveFreePercent, plan: 'free' as const, users: freeUsers, mrr: freeMRR, color: 'bg-gray-400', show: freePlanEnabled },
-                                { label: 'Starter', value: freePlanEnabled ? starterPercent : effectiveStarterPercent, displayValue: effectiveStarterPercent, plan: 'starter' as const, users: starterUsers, mrr: starterMRR, color: 'bg-accent', show: true },
-                                { label: 'Pro', value: freePlanEnabled ? proPercent : effectiveProPercent, displayValue: effectiveProPercent, plan: 'pro' as const, users: proUsers, mrr: proMRR, color: 'bg-purple-500', show: true },
+                                { label: 'Free', value: freePercent, displayValue: effectiveFreePercent, plan: 'free' as const, users: freeUsers, mrr: freeMRR, color: 'bg-gray-400', show: freePlanEnabled },
+                                { label: 'Standard', value: starterPercent, displayValue: effectiveStarterPercent, plan: 'starter' as const, users: starterUsers, mrr: starterMRR, color: 'bg-accent', show: true },
+                                { label: 'Pro', value: proPercent, displayValue: effectiveProPercent, plan: 'pro' as const, users: proUsers, mrr: proMRR, color: 'bg-purple-500', show: true },
                             ].filter(item => item.show).map((item) => (
                                 <div key={item.label}>
                                     <div className="flex items-center justify-between mb-1">
@@ -478,8 +713,8 @@ export function SaaSCalculator() {
                                         style={{ touchAction: 'none' }}
                                     />
                                     <div className="flex justify-between text-xs text-muted mt-1">
-                                        <span>{item.users.toLocaleString()}人</span>
-                                        <span>{formatCompactCurrency(item.mrr)}/月</span>
+                                        <span>{item.users.toLocaleString()}{t.people}</span>
+                                        <span>{formatCompactCurrency(item.mrr, lang)}{t.perMonth}</span>
                                     </div>
                                 </div>
                             ))}
@@ -490,17 +725,17 @@ export function SaaSCalculator() {
                     <div className="p-4 border border-border rounded-lg">
                         <label className="block text-sm font-medium mb-4">
                             <TrendingUp className="inline w-4 h-4 mr-1" />
-                            成長シミュレーション
+                            {t.growthSimulation}
                         </label>
 
                         {/* 純成長率（メイン表示） */}
                         <div className={`text-center p-4 rounded-lg mb-4 ${numMonthlyGrowthRate - numChurnRate >= 0 ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
-                            <div className="text-xs text-muted mb-1">純成長率（月次）</div>
+                            <div className="text-xs text-muted mb-1">{t.netGrowthRate}</div>
                             <div className={`text-2xl font-bold ${numMonthlyGrowthRate - numChurnRate >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                 {numMonthlyGrowthRate - numChurnRate >= 0 ? '+' : ''}{(numMonthlyGrowthRate - numChurnRate).toFixed(1)}%
                             </div>
                             <div className="text-xs text-muted mt-1">
-                                月 {numMonthlyGrowthRate - numChurnRate >= 0 ? '+' : ''}{Math.round(numTotalUsers * (numMonthlyGrowthRate - numChurnRate) / 100)}人
+                                {numMonthlyGrowthRate - numChurnRate >= 0 ? '+' : ''}{Math.round(numTotalUsers * (numMonthlyGrowthRate - numChurnRate) / 100)}{t.people}{t.monthly}
                             </div>
                         </div>
 
@@ -510,7 +745,7 @@ export function SaaSCalculator() {
                             <div className="p-3 bg-green-500/5 rounded-lg border border-green-500/10">
                                 <div className="flex items-center gap-1 mb-2">
                                     <TrendingUp className="w-3 h-3 text-green-500" />
-                                    <span className="text-xs text-green-600 dark:text-green-400">成長率</span>
+                                    <span className="text-xs text-green-600 dark:text-green-400">{t.growthRate}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <span className="text-green-500 text-sm">+</span>
@@ -527,7 +762,7 @@ export function SaaSCalculator() {
                                     <span className="text-muted text-sm">%</span>
                                 </div>
                                 <div className="text-xs text-muted mt-2">
-                                    +{Math.round(numTotalUsers * numMonthlyGrowthRate / 100)}人/月
+                                    +{Math.round(numTotalUsers * numMonthlyGrowthRate / 100)}{t.people}{t.monthly}
                                 </div>
                             </div>
 
@@ -535,7 +770,7 @@ export function SaaSCalculator() {
                             <div className="p-3 bg-red-500/5 rounded-lg border border-red-500/10">
                                 <div className="flex items-center gap-1 mb-2">
                                     <TrendingDown className="w-3 h-3 text-red-500" />
-                                    <span className="text-xs text-red-600 dark:text-red-400">解約率</span>
+                                    <span className="text-xs text-red-600 dark:text-red-400">{t.churnRate}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <span className="text-red-500 text-sm">-</span>
@@ -552,19 +787,19 @@ export function SaaSCalculator() {
                                     <span className="text-muted text-sm">%</span>
                                 </div>
                                 <div className="text-xs text-muted mt-2">
-                                    -{Math.round(numTotalUsers * numChurnRate / 100)}人/月
+                                    -{Math.round(numTotalUsers * numChurnRate / 100)}{t.people}{t.monthly}
                                 </div>
                             </div>
                         </div>
 
                         {/* クイックプリセット */}
                         <div className="mt-3 flex flex-wrap gap-1">
-                            <span className="text-xs text-muted mr-1">プリセット:</span>
+                            <span className="text-xs text-muted mr-1">{t.presets}</span>
                             {[
-                                { label: '安定', growth: 5, churn: 3 },
-                                { label: '成長期', growth: 15, churn: 5 },
-                                { label: '急成長', growth: 30, churn: 8 },
-                                { label: '停滞', growth: 3, churn: 5 },
+                                { label: t.stable, growth: 5, churn: 3 },
+                                { label: t.growing, growth: 15, churn: 5 },
+                                { label: t.rapid, growth: 30, churn: 8 },
+                                { label: t.stagnant, growth: 3, churn: 5 },
                             ].map((preset) => (
                                 <button
                                     key={preset.label}
@@ -583,10 +818,10 @@ export function SaaSCalculator() {
                     {/* カスタムコスト */}
                     <div className="p-4 border border-border rounded-lg">
                         <div className="flex items-center justify-between mb-3">
-                            <label className="text-sm font-medium">維持コスト</label>
+                            <label className="text-sm font-medium">{t.maintenanceCost}</label>
                             {totalCosts > 0 && (
                                 <span className="text-xs text-muted">
-                                    合計: {formatCurrency(totalCosts)}/月
+                                    {t.total} {formatCurrency(totalCosts, lang)}{t.perMonth}
                                 </span>
                             )}
                         </div>
@@ -597,10 +832,10 @@ export function SaaSCalculator() {
                             {stripeFeeEnabled && (
                                 <div className="flex items-center justify-between p-2 bg-accent/5 rounded text-sm">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs px-1.5 py-0.5 bg-purple-500/10 text-purple-500 rounded">変動</span>
-                                        <span>Stripe手数料 (3.6%)</span>
+                                        <span className="text-xs px-1.5 py-0.5 bg-purple-500/10 text-purple-500 rounded">{t.variable}</span>
+                                        <span>{t.stripeFee} (3.6%)</span>
                                     </div>
-                                    <span className="text-muted">-{formatCurrency(stripeFee)}</span>
+                                    <span className="text-muted">-{formatCurrency(stripeFee, lang)}</span>
                                 </div>
                             )}
 
@@ -611,12 +846,12 @@ export function SaaSCalculator() {
                                     <div key={cost.id} className="flex items-center justify-between p-2 bg-accent/5 rounded text-sm group">
                                         <div className="flex items-center gap-2">
                                             <span className={`text-xs px-1.5 py-0.5 rounded ${cost.type === 'fixed' ? 'bg-blue-500/10 text-blue-500' : 'bg-purple-500/10 text-purple-500'}`}>
-                                                {cost.type === 'fixed' ? '固定' : `${cost.amount}%`}
+                                                {cost.type === 'fixed' ? t.fixed : `${cost.amount}%`}
                                             </span>
                                             <span>{cost.name}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-muted">-{formatCurrency(costAmount)}</span>
+                                            <span className="text-muted">-{formatCurrency(costAmount, lang)}</span>
                                             <button
                                                 onClick={() => removeCustomCost(cost.id)}
                                                 className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 rounded transition-all"
@@ -630,7 +865,7 @@ export function SaaSCalculator() {
 
                             {!stripeFeeEnabled && customCosts.length === 0 && (
                                 <div className="text-sm text-muted text-center py-2">
-                                    コストなし（利益率100%）
+                                    {t.noCost}
                                 </div>
                             )}
                         </div>
@@ -640,7 +875,7 @@ export function SaaSCalculator() {
                             <div className="p-3 border border-border rounded-lg space-y-3">
                                 <input
                                     type="text"
-                                    placeholder="項目名（例: サーバー費, 人件費）"
+                                    placeholder={t.costName}
                                     value={newCostName}
                                     onChange={(e) => setNewCostName(e.target.value)}
                                     className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-accent"
@@ -650,22 +885,22 @@ export function SaaSCalculator() {
                                         onClick={() => setNewCostType('fixed')}
                                         className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-colors ${newCostType === 'fixed' ? 'border-blue-500 bg-blue-500/10 text-blue-500' : 'border-border hover:bg-accent/5'}`}
                                     >
-                                        固定費（¥/月）
+                                        {t.fixedCost}
                                     </button>
                                     <button
                                         onClick={() => setNewCostType('variable')}
                                         className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-colors ${newCostType === 'variable' ? 'border-purple-500 bg-purple-500/10 text-purple-500' : 'border-border hover:bg-accent/5'}`}
                                     >
-                                        変動費（% of MRR）
+                                        {t.variableCost}
                                     </button>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {newCostType === 'fixed' ? (
                                         <>
-                                            <span className="text-muted">¥</span>
+                                            <span className="text-muted">{lang === 'ja' ? '¥' : '$'}</span>
                                             <input
                                                 type="number"
-                                                placeholder="金額"
+                                                placeholder={t.amount}
                                                 value={newCostAmount}
                                                 onChange={(e) => {
                                                     const v = e.target.value
@@ -674,13 +909,13 @@ export function SaaSCalculator() {
                                                 className="flex-1 px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-accent"
                                                 inputMode="numeric"
                                             />
-                                            <span className="text-muted text-sm">/月</span>
+                                            <span className="text-muted text-sm">{t.perMonth}</span>
                                         </>
                                     ) : (
                                         <>
                                             <input
                                                 type="number"
-                                                placeholder="割合"
+                                                placeholder={t.ratio}
                                                 value={newCostAmount}
                                                 onChange={(e) => {
                                                     const v = e.target.value
@@ -696,7 +931,7 @@ export function SaaSCalculator() {
                                 </div>
                                 {newCostType === 'variable' && numNewCostAmount > 0 && (
                                     <div className="text-xs text-muted">
-                                        現在のMRRで: -{formatCurrency(totalMRR * numNewCostAmount / 100)}/月
+                                        {t.currentMrr} -{formatCurrency(totalMRR * numNewCostAmount / 100, lang)}{t.perMonth}
                                     </div>
                                 )}
                                 <div className="flex gap-2">
@@ -708,14 +943,14 @@ export function SaaSCalculator() {
                                         }}
                                         className="flex-1 px-3 py-2 text-sm border border-border rounded-lg hover:bg-accent/5 transition-colors"
                                     >
-                                        キャンセル
+                                        {t.cancel}
                                     </button>
                                     <button
                                         onClick={addCustomCost}
                                         disabled={!newCostName.trim() || numNewCostAmount <= 0}
                                         className="flex-1 px-3 py-2 text-sm bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        追加
+                                        {t.add}
                                     </button>
                                 </div>
                             </div>
@@ -725,7 +960,7 @@ export function SaaSCalculator() {
                                 className="w-full px-3 py-2 text-sm border border-dashed border-border rounded-lg hover:bg-accent/5 hover:border-accent transition-colors flex items-center justify-center gap-1"
                             >
                                 <Plus className="w-4 h-4" />
-                                コストを追加
+                                {t.addCost}
                             </button>
                         )}
 
@@ -733,7 +968,7 @@ export function SaaSCalculator() {
                         {totalMRR > 0 && (
                             <div className="mt-3 pt-3 border-t border-border">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm">利益率</span>
+                                    <span className="text-sm">{t.profitRate}</span>
                                     <span className={`text-sm font-medium ${profitRate >= 80 ? 'text-green-500' : profitRate >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
                                         {profitRate.toFixed(1)}%
                                     </span>
@@ -753,11 +988,16 @@ export function SaaSCalculator() {
                 <div className="space-y-4">
                     {/* MRR */}
                     <div className="p-6 bg-gradient-to-br from-accent/5 to-accent/10 border border-accent/20 rounded-lg">
-                        <div className="text-sm text-muted mb-1">月次経常収益（MRR）</div>
-                        <div className="text-3xl font-bold text-accent">{formatCurrency(totalMRR)}</div>
+                        <div className="text-sm text-muted mb-1">{t.mrr}</div>
+                        <div className="text-3xl font-bold text-accent">{formatCurrency(totalMRR, lang)}</div>
+                        {firstMonthFree && freeTrialDiscount > 0 && (
+                            <div className="mt-2 text-sm text-orange-500">
+                                🎁 {t.firstMonthFreeDiscount}: -{formatCurrency(freeTrialDiscount, lang)}（{freeTrialStarterUsers + freeTrialProUsers}{t.peopleUnit}）
+                            </div>
+                        )}
                         {totalCosts > 0 && (
                             <div className="mt-2 text-sm text-muted">
-                                コスト: {formatCurrency(totalCosts)} → 純MRR: <span className="text-foreground font-medium">{formatCurrency(netMRR)}</span>
+                                {t.cost}: {formatCurrency(totalCosts, lang)} → {t.netMrr}: <span className="text-foreground font-medium">{formatCurrency(netMRR, lang)}</span>
                                 <span className={`ml-2 ${profitRate >= 80 ? 'text-green-500' : profitRate >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
                                     ({profitRate.toFixed(1)}%)
                                 </span>
@@ -765,18 +1005,18 @@ export function SaaSCalculator() {
                         )}
                         {totalCosts === 0 && (
                             <div className="mt-2 text-sm text-green-500">
-                                利益率 100%
+                                {t.profitRate} 100%
                             </div>
                         )}
                     </div>
 
                     {/* ARR */}
                     <div className="p-6 bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/20 rounded-lg">
-                        <div className="text-sm text-muted mb-1">年次経常収益（ARR）</div>
-                        <div className="text-3xl font-bold text-purple-500">{formatCompactCurrency(totalARR)}</div>
+                        <div className="text-sm text-muted mb-1">{t.arr}</div>
+                        <div className="text-3xl font-bold text-purple-500">{formatCompactCurrency(totalARR, lang)}</div>
                         {totalCosts > 0 && (
                             <div className="mt-2 text-sm text-muted">
-                                年間コスト: {formatCompactCurrency(totalCosts * 12)} → 純ARR: <span className="text-foreground font-medium">{formatCompactCurrency(netARR)}</span>
+                                {t.annualCost}: {formatCompactCurrency(totalCosts * 12, lang)} → {t.netArr}: <span className="text-foreground font-medium">{formatCompactCurrency(netARR, lang)}</span>
                             </div>
                         )}
                     </div>
@@ -784,25 +1024,25 @@ export function SaaSCalculator() {
                     {/* ARPU / ARPPU */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-gradient-to-br from-green-500/5 to-green-500/10 border border-green-500/20 rounded-lg">
-                            <div className="text-xs text-muted mb-1">ARPU（全体）</div>
-                            <div className="text-xl font-bold text-green-500">{formatCurrency(arpu)}</div>
-                            <div className="text-xs text-muted mt-1">/ ユーザー / 月</div>
+                            <div className="text-xs text-muted mb-1">{t.arpuAll}</div>
+                            <div className="text-xl font-bold text-green-500">{formatCurrency(arpu, lang)}</div>
+                            <div className="text-xs text-muted mt-1">{t.perUser}</div>
                         </div>
                         <div className="p-4 bg-gradient-to-br from-orange-500/5 to-orange-500/10 border border-orange-500/20 rounded-lg">
-                            <div className="text-xs text-muted mb-1">ARPPU（有料のみ）</div>
-                            <div className="text-xl font-bold text-orange-500">{formatCurrency(arppu)}</div>
-                            <div className="text-xs text-muted mt-1">/ 有料ユーザー / 月</div>
+                            <div className="text-xs text-muted mb-1">{t.arppuPaid}</div>
+                            <div className="text-xl font-bold text-orange-500">{formatCurrency(arppu, lang)}</div>
+                            <div className="text-xs text-muted mt-1">{t.perPaidUser}</div>
                         </div>
                     </div>
 
                     {/* 12ヶ月後サマリー */}
                     <div className="p-4 border border-border rounded-lg">
-                        <div className="text-sm font-medium mb-3">12ヶ月後の予測</div>
+                        <div className="text-sm font-medium mb-3">{t.forecast12}</div>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <div className="text-muted text-xs">ユーザー数</div>
+                                <div className="text-muted text-xs">{t.users}</div>
                                 <div className="font-medium flex items-center gap-1">
-                                    {lastMonth?.ユーザー数.toLocaleString()}人
+                                    {lastMonth?.ユーザー数.toLocaleString()}{t.people}
                                     {userGrowthRate >= 0 ? (
                                         <TrendingUp className="w-3 h-3 text-green-500" />
                                     ) : (
@@ -814,16 +1054,16 @@ export function SaaSCalculator() {
                                 </div>
                             </div>
                             <div>
-                                <div className="text-muted text-xs">純MRR</div>
-                                <div className="font-medium">{formatCompactCurrency(lastMonth?.純MRR || 0)}</div>
+                                <div className="text-muted text-xs">{t.netMrr}</div>
+                                <div className="font-medium">{formatCompactCurrency(lastMonth?.純MRR || 0, lang)}</div>
                             </div>
                             <div>
-                                <div className="text-muted text-xs">累積純売上</div>
-                                <div className="font-medium">{formatCompactCurrency(lastMonth?.累積純売上 || 0)}</div>
+                                <div className="text-muted text-xs">{t.cumulativeNet}</div>
+                                <div className="font-medium">{formatCompactCurrency(lastMonth?.累積純売上 || 0, lang)}</div>
                             </div>
                             <div>
-                                <div className="text-muted text-xs">年換算ARR</div>
-                                <div className="font-medium">{formatCompactCurrency((lastMonth?.純MRR || 0) * 12)}</div>
+                                <div className="text-muted text-xs">{t.annualizedArr}</div>
+                                <div className="font-medium">{formatCompactCurrency((lastMonth?.純MRR || 0) * 12, lang)}</div>
                             </div>
                         </div>
                     </div>
@@ -833,13 +1073,13 @@ export function SaaSCalculator() {
             {/* グラフエリア */}
             <div className="space-y-6">
                 <div className="flex items-center justify-between flex-wrap gap-4">
-                    <h2 className="text-lg font-medium">12ヶ月シミュレーション</h2>
+                    <h2 className="text-lg font-medium">{t.simulation12}</h2>
                     <div className="flex items-center gap-2 flex-wrap">
                         {/* クイックシェアボタン */}
                         <button
                             onClick={() => copyToClipboard()}
                             className="flex items-center gap-2 px-3 py-2 text-sm border border-border rounded-lg hover:bg-accent/10 transition-colors"
-                            title="テキストをコピー"
+                            title={t.copy}
                         >
                             {copied ? (
                                 <Check className="w-4 h-4 text-green-500" />
@@ -850,14 +1090,14 @@ export function SaaSCalculator() {
                         <button
                             onClick={() => shareToX()}
                             className="flex items-center gap-2 px-3 py-2 text-sm bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-                            title="Xでシェア"
+                            title="X"
                         >
                             <X className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => shareToLINE()}
                             className="flex items-center gap-2 px-3 py-2 text-sm bg-[#06C755] text-white rounded-lg hover:bg-[#05b34c] transition-colors"
-                            title="LINEでシェア"
+                            title="LINE"
                         >
                             <MessageCircle className="w-4 h-4" />
                         </button>
@@ -867,7 +1107,7 @@ export function SaaSCalculator() {
                             className="flex items-center gap-2 px-3 py-2 text-sm bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
                         >
                             <Edit3 className="w-4 h-4" />
-                            シェア
+                            {t.share}
                         </button>
                         <button
                             onClick={exportCSV}
@@ -882,7 +1122,7 @@ export function SaaSCalculator() {
                 <div className="grid md:grid-cols-2 gap-6">
                     {/* MRR推移 */}
                     <div className="p-4 border border-border rounded-lg">
-                        <h3 className="text-sm font-medium mb-4">MRR推移</h3>
+                        <h3 className="text-sm font-medium mb-4">{t.mrrTrend}</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={growthData}>
@@ -923,7 +1163,7 @@ export function SaaSCalculator() {
 
                     {/* ユーザー数推移 */}
                     <div className="p-4 border border-border rounded-lg">
-                        <h3 className="text-sm font-medium mb-4">ユーザー数推移</h3>
+                        <h3 className="text-sm font-medium mb-4">{t.userTrend}</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={growthData}>
@@ -952,7 +1192,7 @@ export function SaaSCalculator() {
 
                     {/* プラン別ユーザー数 */}
                     <div className="p-4 border border-border rounded-lg">
-                        <h3 className="text-sm font-medium mb-4">プラン別ユーザー数</h3>
+                        <h3 className="text-sm font-medium mb-4">{t.usersByPlan}</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={growthData}>
@@ -969,7 +1209,7 @@ export function SaaSCalculator() {
                                     />
                                     <Legend />
                                     <Bar dataKey="Free" stackId="a" fill="#9ca3af" />
-                                    <Bar dataKey="Starter" stackId="a" fill="var(--accent)" />
+                                    <Bar dataKey="Standard" stackId="a" fill="var(--accent)" />
                                     <Bar dataKey="Pro" stackId="a" fill="#8b5cf6" />
                                 </BarChart>
                             </ResponsiveContainer>
@@ -978,7 +1218,7 @@ export function SaaSCalculator() {
 
                     {/* 累積純売上 */}
                     <div className="p-4 border border-border rounded-lg">
-                        <h3 className="text-sm font-medium mb-4">累積純売上</h3>
+                        <h3 className="text-sm font-medium mb-4">{t.cumulativeRevenue}</h3>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={growthData}>
@@ -1007,9 +1247,9 @@ export function SaaSCalculator() {
 
             {/* 注意書き */}
             <div className="text-xs text-muted pt-4 border-t border-border">
-                ※ このツールはシミュレーション用です。実際の収益は様々な要因により異なります。
+                {t.disclaimer1}
                 <br />
-                ※ データはブラウザ上でのみ処理され、サーバーには送信されません。
+                {t.disclaimer2}
             </div>
 
             {/* シェアモーダル */}
@@ -1027,7 +1267,7 @@ export function SaaSCalculator() {
                         <div className="flex items-center justify-between p-4 border-b border-border">
                             <h3 className="text-lg font-semibold flex items-center gap-2">
                                 <Share2 className="w-5 h-5" />
-                                シェア
+                                {t.share}
                             </h3>
                             <button
                                 onClick={() => setShowShareModal(false)}
@@ -1042,7 +1282,7 @@ export function SaaSCalculator() {
                             {/* テキスト編集エリア */}
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    シェアテキスト（編集可能）
+                                    {t.shareText}
                                 </label>
                                 <textarea
                                     value={customShareText}
@@ -1051,13 +1291,13 @@ export function SaaSCalculator() {
                                 />
                                 <div className="flex justify-between mt-2">
                                     <span className="text-xs text-muted">
-                                        {customShareText.length} 文字
+                                        {customShareText.length} {t.chars}
                                     </span>
                                     <button
                                         onClick={() => setCustomShareText(generateShareText())}
                                         className="text-xs text-accent hover:underline"
                                     >
-                                        リセット
+                                        {t.reset}
                                     </button>
                                 </div>
                             </div>
@@ -1065,7 +1305,7 @@ export function SaaSCalculator() {
                             {/* シェア先選択 */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium">
-                                    シェア先を選択
+                                    {t.selectDestination}
                                 </label>
                                 <div className="grid grid-cols-2 gap-2">
                                     {/* X(Twitter) */}
@@ -1114,12 +1354,12 @@ export function SaaSCalculator() {
                                         {copied ? (
                                             <>
                                                 <Check className="w-5 h-5 text-green-500" />
-                                                <span className="text-green-500">コピー済み</span>
+                                                <span className="text-green-500">{t.copied}</span>
                                             </>
                                         ) : (
                                             <>
                                                 <Copy className="w-5 h-5" />
-                                                <span>コピー</span>
+                                                <span>{t.copy}</span>
                                             </>
                                         )}
                                     </button>
@@ -1129,7 +1369,7 @@ export function SaaSCalculator() {
                             {/* プレビュー */}
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    プレビュー
+                                    {t.preview}
                                 </label>
                                 <div className="p-4 bg-accent/5 rounded-lg border border-border">
                                     <pre className="text-sm whitespace-pre-wrap font-sans text-muted">
