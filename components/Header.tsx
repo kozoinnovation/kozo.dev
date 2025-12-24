@@ -8,7 +8,7 @@ export function Header() {
                 <Link href="/" className="text-lg font-semibold">
                     kozo.dev
                 </Link>
-                <nav className="flex items-center gap-6">
+                <nav className="flex items-center gap-4 sm:gap-6">
                     <Link href="/tools" className="text-sm text-muted hover:text-foreground transition-colors">
                         Tools
                     </Link>
@@ -17,9 +17,6 @@ export function Header() {
                     </Link>
                     <Link href="/about" className="text-sm text-muted hover:text-foreground transition-colors">
                         About
-                    </Link>
-                    <Link href="/contact" className="text-sm text-muted hover:text-foreground transition-colors">
-                        Contact
                     </Link>
                     <ThemeToggle />
                 </nav>

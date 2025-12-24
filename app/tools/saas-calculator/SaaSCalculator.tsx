@@ -48,11 +48,12 @@ export function SaaSCalculator() {
     // 基本設定
     const [totalUsers, setTotalUsers] = useState<number | ''>(1000)
     const [stripeFeeEnabled, setStripeFeeEnabled] = useState(true)
+    const [freePlanEnabled, setFreePlanEnabled] = useState(true)
 
     // プラン料金
     const [freePlanPrice, setFreePlanPrice] = useState<number | ''>(0)
     const [starterPlanPrice, setStarterPlanPrice] = useState<number | ''>(980)
-    const [proPlanPrice, setProPlanPrice] = useState<number | ''>(6980)
+    const [proPlanPrice, setProPlanPrice] = useState<number | ''>(2980)
 
     // ユーザー配分
     const [freePercent, setFreePercent] = useState<number | ''>(60)
@@ -87,10 +88,14 @@ export function SaaSCalculator() {
     const numChurnRate = churnRate || 0
     const numNewCostAmount = newCostAmount || 0
 
-    // 計算値
-    const freeUsers = Math.round((numTotalUsers * numFreePercent) / 100)
-    const starterUsers = Math.round((numTotalUsers * numStarterPercent) / 100)
-    const proUsers = Math.round((numTotalUsers * numProPercent) / 100)
+    // 計算値（Freeプラン無効時は配分を自動調整）
+    const effectiveFreePercent = freePlanEnabled ? numFreePercent : 0
+    const effectiveStarterPercent = freePlanEnabled ? numStarterPercent : Math.round(numStarterPercent / (numStarterPercent + numProPercent) * 100) || 50
+    const effectiveProPercent = freePlanEnabled ? numProPercent : 100 - effectiveStarterPercent
+
+    const freeUsers = Math.round((numTotalUsers * effectiveFreePercent) / 100)
+    const starterUsers = Math.round((numTotalUsers * effectiveStarterPercent) / 100)
+    const proUsers = Math.round((numTotalUsers * effectiveProPercent) / 100)
 
     const freeMRR = freeUsers * numFreePlanPrice
     const starterMRR = starterUsers * numStarterPlanPrice
@@ -130,9 +135,9 @@ export function SaaSCalculator() {
             const churnedUsers = Math.round(monthStartUsers * (numChurnRate / 100))
             currentUsers = Math.max(0, monthStartUsers + newUsers - churnedUsers)
 
-            const monthlyFreeUsers = Math.round((currentUsers * numFreePercent) / 100)
-            const monthlyStarterUsers = Math.round((currentUsers * numStarterPercent) / 100)
-            const monthlyProUsers = Math.round((currentUsers * numProPercent) / 100)
+            const monthlyFreeUsers = Math.round((currentUsers * effectiveFreePercent) / 100)
+            const monthlyStarterUsers = Math.round((currentUsers * effectiveStarterPercent) / 100)
+            const monthlyProUsers = Math.round((currentUsers * effectiveProPercent) / 100)
 
             const monthlyFreeMRR = monthlyFreeUsers * numFreePlanPrice
             const monthlyStarterMRR = monthlyStarterUsers * numStarterPlanPrice
@@ -166,9 +171,9 @@ export function SaaSCalculator() {
         numTotalUsers,
         numMonthlyGrowthRate,
         numChurnRate,
-        numFreePercent,
-        numStarterPercent,
-        numProPercent,
+        effectiveFreePercent,
+        effectiveStarterPercent,
+        effectiveProPercent,
         numFreePlanPrice,
         numStarterPlanPrice,
         numProPlanPrice,
@@ -181,6 +186,18 @@ export function SaaSCalculator() {
     const handlePercentChange = (plan: 'free' | 'starter' | 'pro', value: number) => {
         const clampedValue = Math.max(0, Math.min(100, value))
         const remaining = 100 - clampedValue
+
+        if (!freePlanEnabled) {
+            // Freeプラン無効時はStarterとProで100%に
+            if (plan === 'starter') {
+                setStarterPercent(clampedValue)
+                setProPercent(remaining)
+            } else if (plan === 'pro') {
+                setProPercent(clampedValue)
+                setStarterPercent(remaining)
+            }
+            return
+        }
 
         if (plan === 'free') {
             setFreePercent(clampedValue)
@@ -398,13 +415,26 @@ export function SaaSCalculator() {
 
                     {/* プラン料金設定 */}
                     <div className="p-4 border border-border rounded-lg">
-                        <label className="block text-sm font-medium mb-3">プラン料金（月額）</label>
+                        <div className="flex items-center justify-between mb-3">
+                            <label className="text-sm font-medium">プラン料金（月額）</label>
+                            <button
+                                onClick={() => setFreePlanEnabled(!freePlanEnabled)}
+                                className={`flex items-center gap-2 px-3 py-1.5 text-xs rounded-full transition-colors ${
+                                    freePlanEnabled
+                                        ? 'bg-gray-200 dark:bg-gray-700 text-muted'
+                                        : 'bg-accent text-white'
+                                }`}
+                            >
+                                <span className={`w-2 h-2 rounded-full ${freePlanEnabled ? 'bg-gray-400' : 'bg-white'}`} />
+                                {freePlanEnabled ? 'Freeあり' : '全員有料'}
+                            </button>
+                        </div>
                         <div className="space-y-3">
                             {[
-                                { label: 'Free', value: freePlanPrice, setter: setFreePlanPrice, color: 'text-muted' },
-                                { label: 'Starter', value: starterPlanPrice, setter: setStarterPlanPrice, color: 'text-accent' },
-                                { label: 'Pro', value: proPlanPrice, setter: setProPlanPrice, color: 'text-purple-500' },
-                            ].map((plan) => (
+                                { label: 'Free', value: freePlanPrice, setter: setFreePlanPrice, color: 'text-muted', show: freePlanEnabled },
+                                { label: 'Starter', value: starterPlanPrice, setter: setStarterPlanPrice, color: 'text-accent', show: true },
+                                { label: 'Pro', value: proPlanPrice, setter: setProPlanPrice, color: 'text-purple-500', show: true },
+                            ].filter(plan => plan.show).map((plan) => (
                                 <div key={plan.label} className="flex items-center gap-2">
                                     <span className={`w-16 text-sm font-medium ${plan.color}`}>{plan.label}</span>
                                     <span className="text-muted">¥</span>
@@ -428,14 +458,14 @@ export function SaaSCalculator() {
                         <label className="block text-sm font-medium mb-3">ユーザー配分</label>
                         <div className="space-y-4">
                             {[
-                                { label: 'Free', value: freePercent, plan: 'free' as const, users: freeUsers, mrr: freeMRR, color: 'bg-gray-400' },
-                                { label: 'Starter', value: starterPercent, plan: 'starter' as const, users: starterUsers, mrr: starterMRR, color: 'bg-accent' },
-                                { label: 'Pro', value: proPercent, plan: 'pro' as const, users: proUsers, mrr: proMRR, color: 'bg-purple-500' },
-                            ].map((item) => (
+                                { label: 'Free', value: freePlanEnabled ? freePercent : 0, displayValue: effectiveFreePercent, plan: 'free' as const, users: freeUsers, mrr: freeMRR, color: 'bg-gray-400', show: freePlanEnabled },
+                                { label: 'Starter', value: freePlanEnabled ? starterPercent : effectiveStarterPercent, displayValue: effectiveStarterPercent, plan: 'starter' as const, users: starterUsers, mrr: starterMRR, color: 'bg-accent', show: true },
+                                { label: 'Pro', value: freePlanEnabled ? proPercent : effectiveProPercent, displayValue: effectiveProPercent, plan: 'pro' as const, users: proUsers, mrr: proMRR, color: 'bg-purple-500', show: true },
+                            ].filter(item => item.show).map((item) => (
                                 <div key={item.label}>
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="text-sm">{item.label}</span>
-                                        <span className="text-sm text-muted">{item.value}%</span>
+                                        <span className="text-sm text-muted">{item.displayValue}%</span>
                                     </div>
                                     <input
                                         type="range"
@@ -443,6 +473,7 @@ export function SaaSCalculator() {
                                         max="100"
                                         value={item.value}
                                         onChange={(e) => handlePercentChange(item.plan, parseInt(e.target.value))}
+                                        onTouchEnd={(e) => e.preventDefault()}
                                         className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-accent"
                                         style={{ touchAction: 'none' }}
                                     />

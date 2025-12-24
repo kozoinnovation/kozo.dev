@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export function Footer() {
     return (
         <footer className="border-t border-border py-8 mt-16">
@@ -12,12 +14,12 @@ export function Footer() {
                     >
                         X (@kozo_innov)
                     </a>
-                    <a
-                        href="mailto:hello@kozo.dev"
+                    <Link
+                        href="/contact"
                         className="hover:text-foreground transition-colors"
                     >
-                        Email
-                    </a>
+                        Contact
+                    </Link>
                 </div>
             </div>
         </footer>
