@@ -6,6 +6,12 @@ export function Footer() {
             <div className="max-w-3xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted">
                 <p>© 2025 Hiroki</p>
                 <div className="flex items-center gap-6">
+                    <Link
+                        href="/setup"
+                        className="hover:text-foreground transition-colors"
+                    >
+                        Setup
+                    </Link>
                     <a
                         href="https://x.com/kozo_innov"
                         target="_blank"
